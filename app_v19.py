@@ -345,12 +345,10 @@ def load_json(path, default):
     if not path.exists():
         return default
 
-    try:
- with open(path, "r", encoding="utf-8") as file:
-            return json.load(file)
-    except Exception:
-        return default
-
+   def load_file(path):
+    with open(path, "r", encoding="utf-8") as file:
+        content = file.read()
+    return content
 
 def save_json(path, data):
     with open(path, "w", encoding="utf-8") as file:
