@@ -1086,7 +1086,7 @@ elif page == "관리자 페이지":
             value=date.today()
         )
 
-day_df = df[
+        day_df = df[
             df["날짜"].astype(str) == selected_date.isoformat()
         ].copy()
 
@@ -1103,6 +1103,7 @@ day_df = df[
 
         if day_df.empty:
             st.info("선택한 날짜의 출결 기록이 없습니다.")
+
         else:
             st.dataframe(
                 day_df,
@@ -1117,11 +1118,13 @@ day_df = df[
             map_df["위도"] = pd.to_numeric(
                 map_df["위도"], errors="coerce"
             )
- map_df["경도"] = pd.to_numeric(
+            map_df["경도"] = pd.to_numeric(
                 map_df["경도"], errors="coerce"
             )
 
-            map_df = map_df.dropna(subset=["위도", "경도"])
+            map_df = map_df.dropna(
+                subset=["위도", "경도"]
+            )
 
             if not map_df.empty:
                 map_points = map_df.rename(columns={
@@ -1148,7 +1151,7 @@ day_df = df[
                         f"정확도 약 {location_row['GPS정확도(m)']}m"
                     )
 
-   map_url = str(
+                    map_url = str(
                         location_row.get("지도링크", "")
                     ).strip()
 
@@ -1158,6 +1161,7 @@ day_df = df[
                             map_url,
                             key=f"admin_map_{idx}"
                         )
+
             else:
                 st.info(
                     "지도에 표시할 좌표가 없습니다. "
@@ -1168,9 +1172,11 @@ day_df = df[
             st.subheader("출결 기록 수정")
 
             names = day_df["이름"].astype(str).tolist()
+
             selected_name = st.selectbox(
                 "수정할 이름",
-                names
+                names,
+                key=f"admin_edit_name_{selected_date}"
             )
 
             row_matches = day_df[
@@ -1179,7 +1185,10 @@ day_df = df[
 
             if not row_matches.empty:
                 selected_row = row_matches.iloc[-1]
-   current_status = str(selected_row["출결상태"])
+
+                current_status = str(
+                    selected_row["출결상태"]
+                )
                 status_options = ["출석", "결석", "지각"]
 
                 status_index = (
@@ -1211,14 +1220,24 @@ day_df = df[
                     ABSENCE_REASONS,
                     index=reason_index(
                         selected_row["결석사유"],
-  ABSENCE_REASONS
+                        ABSENCE_REASONS
                     ),
                     key=f"admin_edit_absence_{selected_date}_{selected_name}"
                 )
+
                 new_absence_detail = ""
+
                 if new_absence == "기타":
-                    old_absence = str(selected_row.get("결석사유", ""))
-                    old_absence_detail = old_absence.split(":", 1)[1].strip() if old_absence.startswith("기타:") else ""
+                    old_absence = str(
+                        selected_row.get("결석사유", "")
+                    )
+
+                    old_absence_detail = (
+                        old_absence.split(":", 1)[1].strip()
+                        if old_absence.startswith("기타:")
+                        else ""
+                    )
+
                     new_absence_detail = st.text_input(
                         "결석 사유 상세 입력",
                         value=old_absence_detail,
@@ -1234,22 +1253,43 @@ day_df = df[
                     ),
                     key=f"admin_edit_late_{selected_date}_{selected_name}"
                 )
+
                 new_late_detail = ""
+
                 if new_late == "기타":
-                    old_late = str(selected_row.get("지각사유", ""))
-                    old_late_detail = old_late.split(":", 1)[1].strip() if old_late.startswith("기타:") else ""
+                    old_late = str(
+                        selected_row.get("지각사유", "")
+                    )
+
+                    old_late_detail = (
+                        old_late.split(":", 1)[1].strip()
+                        if old_late.startswith("기타:")
+                        else ""
+                    )
+
                     new_late_detail = st.text_input(
                         "지각 사유 상세 입력",
                         value=old_late_detail,
                         key=f"admin_edit_late_detail_{selected_date}_{selected_name}"
                     )
 
-save_edit = st.button("수정 저장", key="admin_save_edit")
+                save_edit = st.button(
+                    "수정 저장",
+                    key="admin_save_edit"
+                )
 
                 if save_edit:
+                    df = load_data()
+
                     mask = (
-                        (df["날짜"].astype(str) == selected_date.isoformat())
-                        & (df["이름"].astype(str) == selected_name)
+                        (
+                            df["날짜"].astype(str)
+                            == selected_date.isoformat()
+                        )
+                        & (
+                            df["이름"].astype(str)
+                            == selected_name
+                        )
                     )
 
                     indexes = df.index[mask].tolist()
@@ -1258,26 +1298,51 @@ save_edit = st.button("수정 저장", key="admin_save_edit")
                         idx = indexes[-1]
 
                         df.at[idx, "출결상태"] = new_status
+
                         df.at[idx, "결석사유"] = (
                             f"기타: {new_absence_detail.strip()}"
-                            if new_status == "결석" and new_absence == "기타" and new_absence_detail.strip()
-                            else new_absence if new_status == "결석" else ""
+                            if (
+                                new_status == "결석"
+                                and new_absence == "기타"
+                                and new_absence_detail.strip()
+                            )
+                            else (
+                                new_absence
+                                if new_status == "결석"
+                                else ""
+                            )
                         )
+
                         df.at[idx, "지각사유"] = (
                             f"기타: {new_late_detail.strip()}"
-                            if new_status == "지각" and new_late == "기타" and new_late_detail.strip()
-                            else new_late if new_status == "지각" else ""
+                            if (
+                                new_status == "지각"
+                                and new_late == "기타"
+                                and new_late_detail.strip()
+                            )
+                            else (
+                                new_late
+                                if new_status == "지각"
+                                else ""
+                            )
                         )
 
                         save_data(df)
                         st.success("출결 기록을 수정했습니다.")
                         st.rerun()
 
-# CSV 다운로드
+                    else:
+                        st.error("수정할 출결 기록을 찾을 수 없습니다.")
+
+        # -------------------------
+        # CSV 다운로드
+        # -------------------------
         st.divider()
         st.subheader("출결 데이터 다운로드")
 
-        all_csv = df.to_csv(
+        all_df = load_data()
+
+        all_csv = all_df.to_csv(
             index=False,
             encoding="utf-8-sig"
         ).encode("utf-8-sig")
@@ -1296,19 +1361,21 @@ save_edit = st.button("수정 저장", key="admin_save_edit")
         )
 
         month_key = month_value.strftime("%Y-%m")
-        month_df = df[
-            df["날짜"].astype(str).str.startswith(month_key)
+
+        month_df = all_df[
+            all_df["날짜"].astype(str).str.startswith(month_key)
         ].copy()
 
         st.download_button(
             "선택 월 CSV 다운로드",
             data=month_df.to_csv(
                 index=False,
-   encoding="utf-8-sig"
+                encoding="utf-8-sig"
             ).encode("utf-8-sig"),
             file_name=f"{month_key}_출결기록.csv",
             mime="text/csv"
         )
+
 
     # -------------------------
     # 출석 기간 설정
