@@ -1429,12 +1429,16 @@ elif page == "관리자 페이지":
                 )
                 st.rerun()
 
-  # -------------------------
+
+    # -------------------------
     # 관리자 관리
     # -------------------------
     with tab3:
         st.subheader("관리자 임명")
         current_admins = load_json(ADMINS_FILE, [])
+
+        if not isinstance(current_admins, list):
+            current_admins = []
 
         with st.form("add_admin_form"):
             new_admin = st.text_input("관리자로 지정할 이름")
@@ -1445,14 +1449,19 @@ elif page == "관리자 페이지":
 
             if not new_admin:
                 st.error("이름을 입력해 주세요.")
+
             elif new_admin in current_admins:
                 st.warning("이미 관리자입니다.")
-                current_admins = [
-                    name for name in current_admins
-                    if name != remove_name
-                ]
 
-  st.divider()
+            else:
+                current_admins.append(new_admin)
+                save_json(ADMINS_FILE, current_admins)
+                st.success(
+                    f"{new_admin} 님을 관리자로 임명했습니다."
+                )
+                st.rerun()
+
+        st.divider()
         st.subheader("관리자 목록")
 
         if current_admins:
@@ -1482,17 +1491,11 @@ elif page == "관리자 페이지":
                     f"{remove_name} 님의 관리자 권한을 해제했습니다."
                 )
                 st.rerun()
-        else:
-            st.info("해제할 수 있는 다른 관리자가 없습니다.")
-                save_json(ADMINS_FILE, current_admins)
-                st.success(
-                    f"{remove_name} 님의 관리자 권한을 해제했습니다."
-                )
-                st.rerun()
+
         else:
             st.caption("해제할 다른 관리자가 없습니다.")
 
-
+  
 # -----------------------------
 # 안내
 # -----------------------------
