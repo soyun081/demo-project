@@ -384,7 +384,7 @@ def make_map_link(lat, lon):
 
 
 def haversine_m(lat1, lon1, lat2, lon2):
-"""GPS 두 좌표 사이의 직선거리를 미터 단위로 계산합니다."""
+    """GPS 두 좌표 사이의 직선거리를 미터 단위로 계산합니다."""
     radius = 6371000
 
     p1 = math.radians(lat1)
