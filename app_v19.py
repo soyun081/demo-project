@@ -1447,18 +1447,16 @@ elif page == "관리자 페이지":
                 st.error("이름을 입력해 주세요.")
             elif new_admin in current_admins:
                 st.warning("이미 관리자입니다.")
-            else:
-                current_admins.append(new_admin)
-                save_json(ADMINS_FILE, current_admins)
-                st.success(f"{new_admin} 님을 관리자로 임명했습니다.")
-                st.rerun()
-
-        st.divider()
+                current_admins = [
+                    name for name in current_admins
+                    if name != remove_name
+                ]
+  st.divider()
         st.subheader("관리자 목록")
 
         if current_admins:
             st.write(", ".join(current_admins))
- else:
+        else:
             st.info("등록된 관리자가 없습니다.")
 
         removable_admins = [
@@ -1473,11 +1471,18 @@ elif page == "관리자 페이지":
             )
 
             if st.button("선택한 관리자 해제"):
-                current_admins = [
+                updated_admins = [
                     name for name in current_admins
                     if name != remove_name
                 ]
 
+                save_json(ADMINS_FILE, updated_admins)
+                st.success(
+                    f"{remove_name} 님의 관리자 권한을 해제했습니다."
+                )
+                st.rerun()
+        else:
+            st.info("해제할 수 있는 다른 관리자가 없습니다.")
                 save_json(ADMINS_FILE, current_admins)
                 st.success(
                     f"{remove_name} 님의 관리자 권한을 해제했습니다."
