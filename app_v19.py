@@ -1,3 +1,4 @@
+import streamlit.components.v1 as components
 import streamlit as st
 import pandas as pd
 import json
@@ -413,6 +414,31 @@ if "user_name" not in st.session_state:
 if "location_result" not in st.session_state:
     st.session_state.location_result = None
 
+# 브라우저별 로그인 이름 확인
+components.html(
+    """
+    <script>
+    const KEY = "attendance_user_name";
+    const savedName = localStorage.getItem(KEY);
+
+    window.addEventListener("message", function(event) {
+        if (event.data && event.data.type === "attendance_login") {
+            const name = event.data.name;
+
+            if (savedName && savedName !== name) {
+                window.parent.postMessage({
+                    type: "attendance_login_blocked"
+                }, "*");
+            } else {
+                localStorage.setItem(KEY, name);
+            }
+        }
+    });
+    </script>
+    """,
+    height=0,
+)
+
 df = load_data()
 admins = load_json(ADMINS_FILE, [])
 settings = load_settings()
@@ -473,7 +499,6 @@ if not st.session_state.user_name:
 
 user_name = st.session_state.user_name
 is_admin = user_name in admins
-
 
 # -----------------------------
 # 최초 관리자 임명
