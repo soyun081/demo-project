@@ -466,14 +466,26 @@ with st.sidebar:
         st.subheader("로그인")
         login_name = st.text_input("이름", key="login_name")
 
-        if st.button("로그인", use_container_width=True):
-            name = login_name.strip()
+if st.button("로그인", use_container_width=True):
+    name = login_name.strip()
+    saved_name = cookies.get("attendance_user_name", "")
 
-            if not name:
-                st.error("이름을 입력해 주세요.")
-            else:
-                st.session_state.user_name = name
-                st.rerun()
+    if not name:
+        st.error("이름을 입력해 주세요.")
+
+    elif saved_name and saved_name != name:
+        st.error(
+            f"이 기기는 이미 '{saved_name}' 이름으로 등록되어 있습니다. "
+            "다른 이름으로 로그인할 수 없습니다."
+        )
+
+    else:
+        cookies["attendance_user_name"] = name
+        cookies.save()
+
+        st.session_state.user_name = name
+        st.rerun()
+
     else:
         st.write(f"로그인: **{st.session_state.user_name}**")
 
