@@ -1451,6 +1451,7 @@ elif page == "관리자 페이지":
                     name for name in current_admins
                     if name != remove_name
                 ]
+
   st.divider()
         st.subheader("관리자 목록")
 
