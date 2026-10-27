@@ -2,3 +2,4 @@ streamlit
 pandas
 requests
 streamlit-geolocation
+streamlit-cookies-manager

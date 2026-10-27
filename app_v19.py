@@ -414,10 +414,20 @@ if "user_name" not in st.session_state:
 if "location_result" not in st.session_state:
     st.session_state.location_result = None
 
-# 브라우저별 로그인 이름 확인
-components.html(
-    """
-    <script>
+# -----------------------------
+# 같은 브라우저에서 다른 이름 로그인 제한
+# -----------------------------
+from streamlit_cookies_manager import EncryptedCookieManager
+
+cookies = EncryptedCookieManager(
+    prefix="attendance_app/",
+    password="attendance-device-lock-2026-change-this-secret"
+)
+
+if not cookies.ready():
+    st.stop()   
+
+<script>
     const KEY = "attendance_user_name";
     const savedName = localStorage.getItem(KEY);
 
