@@ -532,6 +532,7 @@ with st.sidebar:
                 cookies.save()
                 st.session_state.user_name = name
                 st.rerun()
+
     else:
         st.write(f"로그인: **{st.session_state.user_name}**")
 
@@ -540,20 +541,22 @@ with st.sidebar:
             st.session_state.location_result = None
             st.rerun()
 
- st.divider()
+    st.divider()
 
- if not admins:
+    if not admins:
         page = st.radio(
             "페이지",
             ["출석관리", "내 출결 기록", "최초 관리자 임명"],
             key="page_no_admin"
         )
+
     elif st.session_state.user_name in admins:
         page = st.radio(
             "페이지",
             ["출석관리", "내 출결 기록", "관리자 페이지"],
             key="page_admin"
         )
+
     else:
         page = st.radio(
             "페이지",
