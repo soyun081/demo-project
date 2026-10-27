@@ -718,10 +718,21 @@ elif page == "출석관리":
                     st.success("GPS 정확도 기준을 통과했습니다.")
 
                     # 장소 검색은 등록 버튼을 누르기 전 미리 실행하지 않습니다.
-                    with st.form("attendance_form"):
+                  with st.form("attendance_form"):
+                        st.subheader("📝 출결 정보 입력")
+                        st.caption(
+                            "출결 상태를 선택하고 해당하는 사유를 입력해 주세요."
+                        )
+
                         status = st.selectbox(
                             "출결 상태",
-                            ["출석", "결석", "지각"]
+                            ["출석", "결석", "지각"],
+                            key="attendance_status"
+                        )
+
+                        st.markdown(
+                            '<div style="height: 12px;"></div>',
+                            unsafe_allow_html=True
                         )
 
                         absence_reason = ""
@@ -729,25 +740,56 @@ elif page == "출석관리":
                         detail = ""
 
                         if status == "결석":
+                            st.markdown("#### 결석 사유")
+
                             absence_reason = st.selectbox(
-                                "결석 사유",
-                                ABSENCE_REASONS
+                                "결석 사유를 선택해 주세요",
+                                ABSENCE_REASONS,
+                                key="attendance_absence_reason"
                             )
 
                             if absence_reason == "기타":
-                                detail = st.text_input("결석 사유 상세 입력")
+                                st.markdown(
+                                    '<div style="height: 8px;"></div>',
+                                    unsafe_allow_html=True
+                                )
+
+                                detail = st.text_input(
+                                    "결석 사유 상세 입력",
+                                    placeholder="결석 사유를 구체적으로 입력해 주세요",
+                                    key="attendance_absence_detail"
+                                )
 
                         elif status == "지각":
+                            st.markdown("#### 지각 사유")
+
                             late_reason = st.selectbox(
-                                "지각 사유",
-                                LATE_REASONS
+                                "지각 사유를 선택해 주세요",
+                                LATE_REASONS,
+                                key="attendance_late_reason"
                             )
 
                             if late_reason == "기타":
-                                detail = st.text_input("지각 사유 상세 입력")
+                                st.markdown(
+                                    '<div style="height: 8px;"></div>',
+                                    unsafe_allow_html=True
+                                )
 
-                        submitted = st.form_submit_button("출석 기록 등록")
+                                detail = st.text_input(
+                                    "지각 사유 상세 입력",
+                                    placeholder="지각 사유를 구체적으로 입력해 주세요",
+                                    key="attendance_late_detail"
+                                )
 
+                        st.markdown(
+                            '<div style="height: 12px;"></div>',
+                            unsafe_allow_html=True
+                        )
+
+                        submitted = st.form_submit_button(
+                            "출석 기록 등록",
+                            use_container_width=True
+                        )
                     if submitted:
                         # 등록 직전 중복 확인
                         df = load_data()
@@ -1506,3 +1548,78 @@ st.caption(
     "건물 이름은 OpenStreetMap 데이터에 등록된 정보에 따라 달라질 수 있습니다. "
     "GPS 위치는 실제 출석을 완벽하게 증명하지 않습니다."
 )
+
+
+# -----------------------------
+# 추가 화면 디자인 개선
+# -----------------------------
+st.markdown("""
+<style>
+/* 화면 전체의 읽기 편한 간격 */
+.block-container {
+    max-width: 1220px;
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+}
+
+/* 입력 항목 사이의 간격 */
+[data-testid="stVerticalBlock"] > div {
+    scroll-margin-top: 16px;
+}
+
+/* 입력 상자 */
+.stTextInput input,
+.stTextArea textarea,
+.stDateInput input {
+    border-radius: 12px !important;
+    min-height: 44px;
+}
+
+/* 선택 상자 */
+.stSelectbox [data-baseweb="select"] > div {
+    border-radius: 12px !important;
+    min-height: 44px;
+}
+
+/* 버튼 */
+.stButton > button,
+.stFormSubmitButton > button,
+.stDownloadButton > button,
+.stLinkButton > a {
+    border-radius: 12px !important;
+    min-height: 44px;
+    font-weight: 650;
+    transition: all 0.15s ease;
+}
+
+/* 입력 폼 */
+[data-testid="stForm"] {
+    padding: 1.2rem;
+    border-radius: 16px;
+    margin-bottom: 1rem;
+}
+
+/* 안내 메시지 */
+[data-testid="stAlert"] {
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+}
+
+/* 출결 통계 카드 */
+[data-testid="stMetric"] {
+    padding: 1rem;
+    border-radius: 14px;
+}
+
+/* 모바일 화면 */
+@media (max-width: 768px) {
+    .block-container {
+        padding: 1rem 0.8rem 2rem;
+    }
+
+    [data-testid="stForm"] {
+        padding: 0.9rem;
+    }
+}
+</style>
+""", unsafe_allow_html=True)
