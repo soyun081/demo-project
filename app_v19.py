@@ -318,17 +318,14 @@ def load_data():
         return pd.DataFrame(columns=COLUMNS)
 
 try:
-        data = pd.read_csv(CSV_FILE, dtype={"이름": str})
-    except Exception:
-        return pd.DataFrame(columns=COLUMNS)
+    # 실행할 코드
+    result = do_something()
 
-    # 이전 버전 CSV와 호환되도록 누락된 열 추가
-    for col in COLUMNS:
-        if col not in data.columns:
-            data[col] = ""
+except Exception as e:
+    # 오류 처리 코드
+    st.error(f"오류가 발생했습니다: {e}")
 
     return data[COLUMNS].fillna("")
-
 
 def save_data(data):
     data = data.copy()
