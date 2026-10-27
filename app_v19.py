@@ -41,8 +41,8 @@ LATE_REASONS = [
     "학교 승인 활동", "기타"
 ]
 
-MAX_GPS_ACCURACY = 300
-BUILDING_SEARCH_RADIUS = 300
+MAX_GPS_ACCURACY = 100
+BUILDING_SEARCH_RADIUS = 100
 
 # -----------------------------
 # 화면 디자인
@@ -308,7 +308,7 @@ def haversine_m(lat1, lon1, lat2, lon2):
 
 def find_nearest_building(lat, lon):
     """
-    OpenStreetMap에서 GPS 위치 기준 300m 이내 건물을 찾고
+    OpenStreetMap에서 GPS 위치 기준 100m 이내 건물을 찾고
     가장 가까운 건물 정보를 반환합니다.
 
     API 키는 필요하지 않지만 인터넷과 검색 서버가 필요합니다.
@@ -557,7 +557,7 @@ elif page == "출석관리":
         else:
             st.info(
                 "브라우저의 위치 권한을 허용해 주세요. "
-                "GPS 정확도가 300m보다 나쁘면 등록할 수 없습니다."
+                "GPS 정확도가 100m보다 나쁘면 등록할 수 없습니다."
             )
 
             try:
@@ -621,7 +621,7 @@ elif page == "출석관리":
 
                 if accuracy > MAX_GPS_ACCURACY:
                     st.error(
-                        "GPS 정확도가 300m를 초과합니다. "
+                        "GPS 정확도가 100m를 초과합니다. "
                         "창가나 실외에서 위치를 다시 확인해 주세요."
                     )
 
@@ -678,7 +678,7 @@ elif page == "출석관리":
                             st.error("GPS 정확도가 기준을 초과했습니다.")
                         else:
                             with st.spinner(
-                                "300m 이내의 가장 가까운 건물을 검색하고 있습니다..."
+                                "100m 이내의 가장 가까운 건물을 검색하고 있습니다..."
                             ):
                                 nearby_building = find_nearest_building(
                                     lat, lon
@@ -686,7 +686,7 @@ elif page == "출석관리":
 
                             if nearby_building is None:
                                 st.error(
-                                    "300m 이내의 건물 정보를 찾지 못했습니다. "
+                                    "100m 이내의 건물 정보를 찾지 못했습니다. "
                                     "인터넷 연결을 확인하고 다시 시도해 주세요. "
                                     "지도 데이터에 건물이 등록되어 있지 않을 수도 있습니다."
                                 )
