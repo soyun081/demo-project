@@ -1266,3 +1266,78 @@ st.caption(
     "건물 이름은 OpenStreetMap 데이터에 등록된 정보에 따라 달라질 수 있습니다. "
     "GPS 위치는 실제 출석을 완벽하게 증명하지 않습니다."
 )
+
+
+# -----------------------------
+# 추가 화면 디자인 개선
+# -----------------------------
+st.markdown("""
+<style>
+/* 화면 전체의 읽기 편한 간격 */
+.block-container {
+    max-width: 1220px;
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+}
+
+/* 입력 항목 사이의 간격 */
+[data-testid="stVerticalBlock"] > div {
+    scroll-margin-top: 16px;
+}
+
+/* 입력 상자 */
+.stTextInput input,
+.stTextArea textarea,
+.stDateInput input {
+    border-radius: 12px !important;
+    min-height: 44px;
+}
+
+/* 선택 상자 */
+.stSelectbox [data-baseweb="select"] > div {
+    border-radius: 12px !important;
+    min-height: 44px;
+}
+
+/* 버튼 */
+.stButton > button,
+.stFormSubmitButton > button,
+.stDownloadButton > button,
+.stLinkButton > a {
+    border-radius: 12px !important;
+    min-height: 44px;
+    font-weight: 650;
+    transition: all 0.15s ease;
+}
+
+/* 입력 폼 */
+[data-testid="stForm"] {
+    padding: 1.2rem;
+    border-radius: 16px;
+    margin-bottom: 1rem;
+}
+
+/* 안내 메시지 */
+[data-testid="stAlert"] {
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+}
+
+/* 출결 통계 카드 */
+[data-testid="stMetric"] {
+    padding: 1rem;
+    border-radius: 14px;
+}
+
+/* 모바일 화면 */
+@media (max-width: 768px) {
+    .block-container {
+        padding: 1rem 0.8rem 2rem;
+    }
+
+    [data-testid="stForm"] {
+        padding: 0.9rem;
+    }
+}
+</style>
+""", unsafe_allow_html=True)
