@@ -571,6 +571,7 @@ if not st.session_state.user_name:
 user_name = st.session_state.user_name
 is_admin = user_name in admins
 
+
 # -----------------------------
 # 최초 관리자 임명
 # -----------------------------
@@ -579,6 +580,7 @@ if page == "최초 관리자 임명":
 
     if admins:
         st.warning("이미 관리자가 지정되어 있습니다.")
+
     else:
         st.warning(
             "이름만으로 로그인하므로 다른 사람의 이름을 입력하면 "
@@ -592,9 +594,12 @@ if page == "최초 관리자 임명":
 
             if not admin_name:
                 st.error("이름을 입력해 주세요.")
+
             else:
                 save_json(ADMINS_FILE, [admin_name])
-                st.success(f"{admin_name} 님을 관리자로 지정했습니다.")
+                st.success(
+                    f"{admin_name} 님을 관리자로 지정했습니다."
+                )
                 st.rerun()
 
 
