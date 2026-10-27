@@ -32,11 +32,13 @@ COLUMNS = [
 ]
 
 ABSENCE_REASONS = [
+    "",  # 공백 선택지 추가
     "질병", "병원 진료", "가정 사정", "경조사",
     "학교 승인 활동", "교통 문제", "기타"
 ]
 
 LATE_REASONS = [
+    "",  # 공백 선택지 추가
     "교통 문제", "늦잠", "병원 진료", "가정 사정",
     "학교 승인 활동", "기타"
 ]
@@ -49,161 +51,94 @@ BUILDING_SEARCH_RADIUS = 300
 # -----------------------------
 st.markdown("""
 <style>
-/* -----------------------------
-   출석관리 UI 테마 - 디자인 전용
-   앱 로직 및 기존 기능은 변경하지 않음
------------------------------- */
-:root {
-    --navy: #174a8b;
-    --navy-dark: #123968;
-    --blue: #2878d0;
-    --blue-soft: #eaf2ff;
-    --page: #f4f7fb;
-    --surface: #ffffff;
-    --text: #1f2937;
-    --muted: #64748b;
- --border: #dce5f0;
-    --shadow: 0 5px 18px rgba(24, 57, 99, 0.055);
-}
-
 .stApp {
-    background: var(--page);
-    color: var(--text);
-    font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+    background: #f3f7fd;
+    color: #1f2937;
+    font-family: "Malgun Gothic", sans-serif;
 }
-
-/* 본문 폭과 여백 */
 .block-container {
-    max-width: 1220px;
-    padding-top: 2.1rem;
+    max-width: 1150px;
+    padding-top: 2rem;
     padding-bottom: 3rem;
 }
-
-/* 제목 위계 */
-h1, h2, h3 {
-    letter-spacing: -0.035em;
-}
 h1 {
-    color: var(--navy) !important;
-    font-size: 2.15rem !important;
-    font-weight: 850 !important;
-    line-height: 1.25 !important;
-    margin-bottom: 0.55rem !important;
+    color: #164e9b !important;
+    font-size: 2.1rem !important;
+    font-weight: 800 !important;
 }
 h2 {
-    color: #1b477c !important;
+    color: #1d4e89 !important;
     font-size: 1.55rem !important;
- font-weight: 780 !important;
-    margin-top: 0.7rem !important;
+    font-weight: 750 !important;
 }
 h3 {
     color: #245b96 !important;
-    font-size: 1.18rem !important;
-    font-weight: 750 !important;
+    font-size: 1.2rem !important;
+    font-weight: 700 !important;
 }
 p, label, .stMarkdown {
-    color: var(--text);
+    color: #263449;
     line-height: 1.65;
 }
 [data-testid="stCaptionContainer"] p {
-    color: var(--muted) !important;
-    font-size: 0.88rem;
+    color: #64748b !important;
+    font-size: 0.9rem;
 }
-
-/* 사이드바 */
 section[data-testid="stSidebar"] {
-    background: #fff;
-    border-right: 1px solid var(--border);
-}
-section[data-testid="stSidebar"] > div {
-    padding-top: 1.3rem;
+    background: #ffffff;
+    border-right: 1px solid #dbe5f1;
 }
 section[data-testid="stSidebar"] * {
-    color: var(--text) !important;
+    color: #1f2937 !important;
 }
 section[data-testid="stSidebar"] h1,
 section[data-testid="stSidebar"] h2,
 section[data-testid="stSidebar"] h3 {
-    color: var(--navy) !important;
+    color: #164e9b !important;
 }
-section[data-testid="stSidebar"] [data-testid="stRadio"] label {
-    border-radius: 9px;
-    padding: 0.28rem 0.45rem;
-}
-
-/* 입력 요소 */
 .stTextInput input,
 .stDateInput input,
 .stNumberInput input,
 .stTextArea textarea {
-    background: #fff !important;
+    background: #ffffff !important;
     color: #172033 !important;
-    border: 1px solid #cbd7e6 !important;
-    border-radius: 10px !important;
-    min-height: 43px;
-    box-shadow: none !important;
-}
-.stTextInput input:focus,
-.stDateInput input:focus,
-.stNumberInput input:focus,
-.stTextArea textarea:focus {
-    border-color: var(--blue) !important;
-    box-shadow: 0 0 0 3px rgba(40, 120, 208, 0.12) !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 9px !important;
+    min-height: 42px;
 }
 .stSelectbox div[data-baseweb="select"] > div,
 .stMultiSelect div[data-baseweb="select"] > div {
-    background: #fff !important;
+    background: #ffffff !important;
     color: #172033 !important;
-    border-radius: 10px !important;
-    border-color: #cbd7e6 !important;
-    min-height: 43px;
+    border-radius: 9px !important;
+    border-color: #cbd5e1 !important;
 }
 .stSelectbox [data-baseweb="select"] *,
 .stMultiSelect [data-baseweb="select"] * {
     color: #172033 !important;
 }
-
-/* 버튼: 기본은 보조 버튼, 제출 버튼은 강조 */
 .stButton > button,
 .stDownloadButton > button,
 .stFormSubmitButton > button,
 div[data-testid="stFormSubmitButton"] button,
 .stLinkButton > a {
-    background: #fff !important;
-    color: #243449 !important;
-    border: 1px solid #c7d4e4 !important;
+    background: #ffffff !important;
+    color: #111827 !important;
+    border: 1px solid #b8c7da !important;
     border-radius: 10px !important;
     min-height: 43px;
     padding: 0.55rem 1rem !important;
     font-weight: 700 !important;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.035);
-    transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
 }
 .stButton > button:hover,
 .stDownloadButton > button:hover,
 .stFormSubmitButton > button:hover,
 div[data-testid="stFormSubmitButton"] button:hover,
 .stLinkButton > a:hover {
-    background: #edf4ff !important;
-    color: var(--navy-dark) !important;
-    border-color: #7aa8e5 !important;
-}
-.stButton > button:active,
-.stFormSubmitButton > button:active {
-    transform: translateY(1px);
-}
-/* 폼 제출/주요 저장 동작은 시각적으로 조금 더 강조 */
-.stFormSubmitButton > button,
-div[data-testid="stFormSubmitButton"] button {
-    background: var(--navy) !important;
-    color: #fff !important;
-    border-color: var(--navy) !important;
-}
-.stFormSubmitButton > button:hover,
-div[data-testid="stFormSubmitButton"] button:hover {
-    background: var(--navy-dark) !important;
-    color: #fff !important;
-    border-color: var(--navy-dark) !important;
+    background: #eef5ff !important;
+    color: #111827 !important;
+    border-color: #4c8fe8 !important;
 }
 .stButton > button:disabled,
 .stDownloadButton > button:disabled {
@@ -211,99 +146,67 @@ div[data-testid="stFormSubmitButton"] button:hover {
     color: #94a3b8 !important;
     border-color: #e2e8f0 !important;
 }
-
-/* 탭 */
 .stTabs [data-baseweb="tab-list"] {
-    gap: 7px;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 3px;
+    gap: 8px;
+    border-bottom: 1px solid #dbe5f1;
 }
 .stTabs [data-baseweb="tab"] {
-    background: transparent;
-    border-radius: 9px 9px 0 0;
+    background: #ffffff;
+    border-radius: 8px 8px 0 0;
     padding: 10px 16px;
 }
 .stTabs [data-baseweb="tab"] p {
-    color: #526176 !important;
-    font-weight: 700 !important;
+    color: #334155 !important;
+    font-weight: 650 !important;
 }
 .stTabs [aria-selected="true"] {
-    background: var(--blue-soft) !important;
-    border-bottom: 3px solid var(--blue) !important;
+    background: #e6f0ff !important;
+    border-bottom: 3px solid #2878d0 !important;
 }
-.stTabs [aria-selected="true"] p {
-    color: var(--navy) !important;
-}
-
-/* 안내 메시지 */
 div[data-testid="stAlert"] {
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    box-shadow: 0 2px 8px rgba(24, 57, 99, 0.025);
+    border-radius: 10px;
+    border: 1px solid #d8e3f0;
 }
-
-/* 관리자 통계 카드 */
 div[data-testid="stMetric"] {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 16px 18px;
-    box-shadow: var(--shadow);
+    background: #ffffff;
+    border: 1px solid #dbe5f1;
+    border-radius: 13px;
+    padding: 16px;
+    box-shadow: 0 2px 5px rgba(15, 23, 42, 0.04);
 }
 div[data-testid="stMetricLabel"] {
     color: #526176 !important;
-    font-weight: 650 !important;
 }
 div[data-testid="stMetricValue"] {
-    color: var(--navy) !important;
-    font-weight: 850 !important;
-    letter-spacing: -0.03em;
+    color: #164e9b !important;
+    font-weight: 800 !important;
 }
-
-/* 표 */
 div[data-testid="stDataFrame"],
 div[data-testid="stTable"] {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 12px;
+    background: #ffffff;
+    border: 1px solid #dbe5f1;
+    border-radius: 10px;
     overflow: hidden;
 }
-
-/* 구분선과 폼 */
 hr {
-    border-color: var(--border) !important;
-    margin-top: 1.45rem;
-    margin-bottom: 1.45rem;
+    border-color: #dbe5f1 !important;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
 }
-[data-testid="stForm"] {
-    background: rgba(255, 255, 255, 0.72);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 1rem 1.1rem 0.8rem;
-}
-
-/* 모바일 최적화 */
 @media (max-width: 768px) {
     .block-container {
-padding: 1.15rem 0.85rem 2rem;
+        padding: 1rem 0.8rem 2rem;
     }
     h1 {
-        font-size: 1.7rem !important;
+        font-size: 1.65rem !important;
     }
     h2 {
-        font-size: 1.32rem !important;
-    }
-    h3 {
-        font-size: 1.1rem !important;
+        font-size: 1.3rem !important;
     }
     .stButton > button,
     .stDownloadButton > button,
-    .stLinkButton > a,
-    .stFormSubmitButton > button {
+    .stLinkButton > a {
         width: 100%;
-    }
-    div[data-testid="stMetric"] {
-        padding: 12px;
     }
 }
 </style>
@@ -318,11 +221,11 @@ def load_data():
         return pd.DataFrame(columns=COLUMNS)
 
     try:
-        data = pd.read_csv(CSV_FILE, encoding="utf-8-sig")
-    except Exception as e:
-        st.error(f"데이터 파일 읽기 오류: {e}")
+        data = pd.read_csv(CSV_FILE, dtype={"이름": str})
+    except Exception:
         return pd.DataFrame(columns=COLUMNS)
 
+    # 이전 버전 CSV와 호환되도록 누락된 열 추가
     for col in COLUMNS:
         if col not in data.columns:
             data[col] = ""
@@ -350,10 +253,8 @@ def load_json(path, default):
 
     try:
         with open(path, "r", encoding="utf-8") as file:
-            content = json.load(file)
-        return content
-    except Exception as e:
-        st.error(f"JSON 파일 읽기 오류: {e}")
+            return json.load(file)
+    except Exception:
         return default
 
 
@@ -375,9 +276,41 @@ def load_settings():
 # -----------------------------
 # 지도 및 GPS
 # -----------------------------
+def make_map_link(lat, lon):
+    query = urlencode({
+        "api": "1",
+        "query": f"{lat},{lon}"
+    })
+    return f"https://www.google.com/maps/search/?{query}"
+
+
+def haversine_m(lat1, lon1, lat2, lon2):
+    """GPS 두 좌표 사이의 직선거리를 미터 단위로 계산합니다."""
+    radius = 6371000
+
+    p1 = math.radians(lat1)
+    p2 = math.radians(lat2)
+    dp = math.radians(lat2 - lat1)
+    dl = math.radians(lon2 - lon1)
+
+    a = (
+        math.sin(dp / 2) ** 2
+        + math.cos(p1)
+        * math.cos(p2)
+        * math.sin(dl / 2) ** 2
+    )
+
+    a = max(0, min(1, a))
+
+    return radius * 2 * math.atan2(
+        math.sqrt(a),
+        math.sqrt(1 - a)
+    )
+
+
 def find_nearest_building(lat, lon):
     """
-    OpenStreetMap에서 GPS 위치 기준 검색 반경 이내 건물을 찾고
+    OpenStreetMap에서 GPS 위치 기준 300m 이내 건물을 찾고
     가장 가까운 건물 정보를 반환합니다.
 
     API 키는 필요하지 않지만 인터넷과 검색 서버가 필요합니다.
@@ -410,7 +343,6 @@ def find_nearest_building(lat, lon):
             response.raise_for_status()
             elements = response.json().get("elements", [])
             break
-
         except Exception:
             continue
 
@@ -441,7 +373,7 @@ def find_nearest_building(lat, lon):
             lat, lon, building_lat, building_lon
         )
 
-        # 검색 반경을 초과한 건물은 제외
+        # 검색 결과도 다시 거리 검사
         if distance > BUILDING_SEARCH_RADIUS:
             continue
 
@@ -455,9 +387,7 @@ def find_nearest_building(lat, lon):
             if address:
                 name = address
             else:
-                building_type = str(
-                    tags.get("building", "")
-                ).strip()
+                building_type = str(tags.get("building", "")).strip()
 
                 if building_type and building_type != "yes":
                     name = f"이름 미등록 건물 ({building_type})"
@@ -532,7 +462,6 @@ with st.sidebar:
                 cookies.save()
                 st.session_state.user_name = name
                 st.rerun()
-
     else:
         st.write(f"로그인: **{st.session_state.user_name}**")
 
@@ -549,14 +478,12 @@ with st.sidebar:
             ["출석관리", "내 출결 기록", "최초 관리자 임명"],
             key="page_no_admin"
         )
-
     elif st.session_state.user_name in admins:
         page = st.radio(
             "페이지",
             ["출석관리", "내 출결 기록", "관리자 페이지"],
             key="page_admin"
         )
-
     else:
         page = st.radio(
             "페이지",
@@ -571,7 +498,6 @@ if not st.session_state.user_name:
 user_name = st.session_state.user_name
 is_admin = user_name in admins
 
-
 # -----------------------------
 # 최초 관리자 임명
 # -----------------------------
@@ -580,7 +506,6 @@ if page == "최초 관리자 임명":
 
     if admins:
         st.warning("이미 관리자가 지정되어 있습니다.")
-
     else:
         st.warning(
             "이름만으로 로그인하므로 다른 사람의 이름을 입력하면 "
@@ -594,12 +519,9 @@ if page == "최초 관리자 임명":
 
             if not admin_name:
                 st.error("이름을 입력해 주세요.")
-
             else:
                 save_json(ADMINS_FILE, [admin_name])
-                st.success(
-                    f"{admin_name} 님을 관리자로 지정했습니다."
-                )
+                st.success(f"{admin_name} 님을 관리자로 지정했습니다.")
                 st.rerun()
 
 
@@ -625,7 +547,6 @@ elif page == "출석관리":
 
     if today < start_date or today > registration_end:
         st.error("현재는 출석 등록 기간이 아닙니다.")
-
     else:
         df = load_data()
 
@@ -636,7 +557,6 @@ elif page == "출석관리":
 
         if already_registered:
             st.warning("오늘은 이미 출석 기록이 등록되어 있습니다.")
-
         else:
             st.info(
                 "브라우저의 위치 권한을 허용해 주세요. "
@@ -646,7 +566,6 @@ elif page == "출석관리":
             try:
                 from streamlit_geolocation import streamlit_geolocation
                 location = streamlit_geolocation()
-
             except ImportError:
                 location = None
                 st.error(
@@ -683,7 +602,6 @@ elif page == "출석관리":
                                 "lon": lon_value,
                                 "accuracy": accuracy_value
                             }
-
                     except (TypeError, ValueError):
                         pass
 
@@ -718,21 +636,10 @@ elif page == "출석관리":
                     st.success("GPS 정확도 기준을 통과했습니다.")
 
                     # 장소 검색은 등록 버튼을 누르기 전 미리 실행하지 않습니다.
-                  with st.form("attendance_form"):
-                        st.subheader("📝 출결 정보 입력")
-                        st.caption(
-                            "출결 상태를 선택하고 해당하는 사유를 입력해 주세요."
-                        )
-
+                    with st.form("attendance_form"):
                         status = st.selectbox(
                             "출결 상태",
-                            ["출석", "결석", "지각"],
-                            key="attendance_status"
-                        )
-
-                        st.markdown(
-                            '<div style="height: 12px;"></div>',
-                            unsafe_allow_html=True
+                            ["출석", "결석", "지각"]
                         )
 
                         absence_reason = ""
@@ -740,56 +647,25 @@ elif page == "출석관리":
                         detail = ""
 
                         if status == "결석":
-                            st.markdown("#### 결석 사유")
-
                             absence_reason = st.selectbox(
-                                "결석 사유를 선택해 주세요",
-                                ABSENCE_REASONS,
-                                key="attendance_absence_reason"
+                                "결석 사유",
+                                ABSENCE_REASONS
                             )
 
                             if absence_reason == "기타":
-                                st.markdown(
-                                    '<div style="height: 8px;"></div>',
-                                    unsafe_allow_html=True
-                                )
-
-                                detail = st.text_input(
-                                    "결석 사유 상세 입력",
-                                    placeholder="결석 사유를 구체적으로 입력해 주세요",
-                                    key="attendance_absence_detail"
-                                )
+                                detail = st.text_input("결석 사유 상세 입력")
 
                         elif status == "지각":
-                            st.markdown("#### 지각 사유")
-
                             late_reason = st.selectbox(
-                                "지각 사유를 선택해 주세요",
-                                LATE_REASONS,
-                                key="attendance_late_reason"
+                                "지각 사유",
+                                LATE_REASONS
                             )
 
                             if late_reason == "기타":
-                                st.markdown(
-                                    '<div style="height: 8px;"></div>',
-                                    unsafe_allow_html=True
-                                )
+                                detail = st.text_input("지각 사유 상세 입력")
 
-                                detail = st.text_input(
-                                    "지각 사유 상세 입력",
-                                    placeholder="지각 사유를 구체적으로 입력해 주세요",
-                                    key="attendance_late_detail"
-                                )
+                        submitted = st.form_submit_button("출석 기록 등록")
 
-                        st.markdown(
-                            '<div style="height: 12px;"></div>',
-                            unsafe_allow_html=True
-                        )
-
-                        submitted = st.form_submit_button(
-                            "출석 기록 등록",
-                            use_container_width=True
-                        )
                     if submitted:
                         # 등록 직전 중복 확인
                         df = load_data()
@@ -801,10 +677,8 @@ elif page == "출석관리":
 
                         if duplicate:
                             st.error("오늘 기록이 이미 존재합니다.")
-
                         elif accuracy > MAX_GPS_ACCURACY:
                             st.error("GPS 정확도가 기준을 초과했습니다.")
-
                         else:
                             with st.spinner(
                                 "300m 이내의 가장 가까운 건물을 검색하고 있습니다..."
@@ -819,7 +693,6 @@ elif page == "출석관리":
                                     "인터넷 연결을 확인하고 다시 시도해 주세요. "
                                     "지도 데이터에 건물이 등록되어 있지 않을 수도 있습니다."
                                 )
-
                             else:
                                 if (
                                     status == "결석"
@@ -870,7 +743,6 @@ elif page == "출석관리":
                                     f"{nearby_building['distance']:.0f}m)"
                                 )
                                 st.rerun()
-
             else:
                 st.warning(
                     "GPS 정보를 아직 받지 못했습니다. "
@@ -893,10 +765,8 @@ elif page == "내 출결 기록":
 
     if mine.empty:
         st.info("등록된 출결 기록이 없습니다.")
-
     else:
         mine = mine.sort_values("날짜", ascending=False)
-
         st.dataframe(
             mine,
             use_container_width=True,
@@ -920,23 +790,17 @@ elif page == "내 출결 기록":
 
         def student_reason_index(value, options):
             value = str(value)
-
             if value in options:
                 return options.index(value)
-
             if value.startswith("기타"):
                 return options.index("기타")
-
             return 0
 
         student_record_labels = {}
-
         for record_index, record in mine.iterrows():
             label = (
-                f"{record.get('날짜', '')} · "
-                f"{record.get('출결상태', '')} · "
-                f"{record.get('건물 이름', '')} · "
-                f"기록 #{record_index}"
+                f"{record.get('날짜', '')} · {record.get('출결상태', '')} · "
+                f"{record.get('건물 이름', '')} · 기록 #{record_index}"
             )
             student_record_labels[label] = record_index
 
@@ -945,19 +809,13 @@ elif page == "내 출결 기록":
             list(student_record_labels.keys()),
             key="student_edit_record"
         )
-
         student_idx = student_record_labels[selected_student_label]
         student_row = df.loc[student_idx]
-
         student_status_options = ["출석", "결석", "지각"]
-        student_current_status = str(
-            student_row.get("출결상태", "출석")
-        )
-
+        student_current_status = str(student_row.get("출결상태", "출석"))
         student_status_index = (
             student_status_options.index(student_current_status)
-            if student_current_status in student_status_options
-            else 0
+            if student_current_status in student_status_options else 0
         )
 
         student_new_status = st.selectbox(
@@ -966,28 +824,16 @@ elif page == "내 출결 기록":
             index=student_status_index,
             key=f"student_edit_status_{student_idx}"
         )
-
         student_new_absence = st.selectbox(
             "결석 사유",
             ABSENCE_REASONS,
-            index=student_reason_index(
-                student_row.get("결석사유", ""),
-                ABSENCE_REASONS
-            ),
+            index=student_reason_index(student_row.get("결석사유", ""), ABSENCE_REASONS),
             key=f"student_edit_absence_{student_idx}"
         )
-
         student_absence_detail = ""
-
         if student_new_absence == "기타":
             old_absence = str(student_row.get("결석사유", ""))
-
-            old_absence_detail = (
-                old_absence.split(":", 1)[1].strip()
-                if old_absence.startswith("기타:")
-                else ""
-            )
-
+            old_absence_detail = old_absence.split(":", 1)[1].strip() if old_absence.startswith("기타:") else ""
             student_absence_detail = st.text_input(
                 "결석 사유 상세 입력",
                 value=old_absence_detail,
@@ -997,103 +843,51 @@ elif page == "내 출결 기록":
         student_new_late = st.selectbox(
             "지각 사유",
             LATE_REASONS,
-            index=student_reason_index(
-                student_row.get("지각사유", ""),
-                LATE_REASONS
-            ),
+            index=student_reason_index(student_row.get("지각사유", ""), LATE_REASONS),
             key=f"student_edit_late_{student_idx}"
         )
-
         student_late_detail = ""
-
         if student_new_late == "기타":
             old_late = str(student_row.get("지각사유", ""))
-
-            old_late_detail = (
-                old_late.split(":", 1)[1].strip()
-                if old_late.startswith("기타:")
-                else ""
-            )
-
+            old_late_detail = old_late.split(":", 1)[1].strip() if old_late.startswith("기타:") else ""
             student_late_detail = st.text_input(
                 "지각 사유 상세 입력",
                 value=old_late_detail,
                 key=f"student_edit_late_detail_{student_idx}"
             )
 
-        if st.button(
-            "내 출결 수정 저장",
-            key="student_save_edit"
-        ):
+        if st.button("내 출결 수정 저장", key="student_save_edit"):
             df = load_data()
-
-            if (
-                student_idx not in df.index
-                or str(df.at[student_idx, "이름"]) != user_name
-            ):
-                st.error(
-                    "수정할 기록을 찾을 수 없습니다. "
-                    "화면을 새로고침해 주세요."
-                )
-
+            if student_idx not in df.index or str(df.at[student_idx, "이름"]) != user_name:
+                st.error("수정할 기록을 찾을 수 없습니다. 화면을 새로고침해 주세요.")
             else:
                 saved_absence = (
                     f"기타: {student_absence_detail.strip()}"
-                    if (
-                        student_new_absence == "기타"
-                        and student_absence_detail.strip()
-                    )
-                    else (
-                        student_new_absence
-                        if student_new_status == "결석"
-                        else ""
-                    )
+                    if student_new_absence == "기타" and student_absence_detail.strip()
+                    else student_new_absence if student_new_status == "결석" else ""
                 )
-
                 saved_late = (
                     f"기타: {student_late_detail.strip()}"
-                    if (
-                        student_new_late == "기타"
-                        and student_late_detail.strip()
-                    )
-                    else (
-                        student_new_late
-                        if student_new_status == "지각"
-                        else ""
-                    )
+                    if student_new_late == "기타" and student_late_detail.strip()
+                    else student_new_late if student_new_status == "지각" else ""
                 )
-
                 df.at[student_idx, "출결상태"] = student_new_status
-                df.at[student_idx, "결석사유"] = (
-                    saved_absence
-                    if student_new_status == "결석"
-                    else ""
-                )
-                df.at[student_idx, "지각사유"] = (
-                    saved_late
-                    if student_new_status == "지각"
-                    else ""
-                )
-
+                df.at[student_idx, "결석사유"] = saved_absence if student_new_status == "결석" else ""
+                df.at[student_idx, "지각사유"] = saved_late if student_new_status == "지각" else ""
                 save_data(df)
                 st.success("내 출결 기록을 수정했습니다.")
                 st.rerun()
 
-        st.divider()
         st.subheader("등록 위치 지도")
 
         for index, record in mine.iterrows():
-            map_url = str(
-                record.get("지도링크", "")
-            ).strip()
+            map_url = str(record.get("지도링크", "")).strip()
 
             if map_url.startswith("https://"):
                 st.write(
-                    f"**{record['날짜']}** · "
-                    f"{record['출결상태']} · "
+                    f"**{record['날짜']}** · {record['출결상태']} · "
                     f"{record.get('건물 이름', '')}"
                 )
-
                 st.link_button(
                     f"{record['날짜']} 지도 열기",
                     map_url,
@@ -1145,7 +939,6 @@ elif page == "관리자 페이지":
 
         if day_df.empty:
             st.info("선택한 날짜의 출결 기록이 없습니다.")
-
         else:
             st.dataframe(
                 day_df,
@@ -1164,9 +957,7 @@ elif page == "관리자 페이지":
                 map_df["경도"], errors="coerce"
             )
 
-            map_df = map_df.dropna(
-                subset=["위도", "경도"]
-            )
+            map_df = map_df.dropna(subset=["위도", "경도"])
 
             if not map_df.empty:
                 map_points = map_df.rename(columns={
@@ -1203,7 +994,6 @@ elif page == "관리자 페이지":
                             map_url,
                             key=f"admin_map_{idx}"
                         )
-
             else:
                 st.info(
                     "지도에 표시할 좌표가 없습니다. "
@@ -1214,11 +1004,9 @@ elif page == "관리자 페이지":
             st.subheader("출결 기록 수정")
 
             names = day_df["이름"].astype(str).tolist()
-
             selected_name = st.selectbox(
                 "수정할 이름",
-                names,
-                key=f"admin_edit_name_{selected_date}"
+                names
             )
 
             row_matches = day_df[
@@ -1227,10 +1015,7 @@ elif page == "관리자 페이지":
 
             if not row_matches.empty:
                 selected_row = row_matches.iloc[-1]
-
-                current_status = str(
-                    selected_row["출결상태"]
-                )
+                current_status = str(selected_row["출결상태"])
                 status_options = ["출석", "결석", "지각"]
 
                 status_index = (
@@ -1266,20 +1051,10 @@ elif page == "관리자 페이지":
                     ),
                     key=f"admin_edit_absence_{selected_date}_{selected_name}"
                 )
-
                 new_absence_detail = ""
-
                 if new_absence == "기타":
-                    old_absence = str(
-                        selected_row.get("결석사유", "")
-                    )
-
-                    old_absence_detail = (
-                        old_absence.split(":", 1)[1].strip()
-                        if old_absence.startswith("기타:")
-                        else ""
-                    )
-
+                    old_absence = str(selected_row.get("결석사유", ""))
+                    old_absence_detail = old_absence.split(":", 1)[1].strip() if old_absence.startswith("기타:") else ""
                     new_absence_detail = st.text_input(
                         "결석 사유 상세 입력",
                         value=old_absence_detail,
@@ -1295,43 +1070,22 @@ elif page == "관리자 페이지":
                     ),
                     key=f"admin_edit_late_{selected_date}_{selected_name}"
                 )
-
                 new_late_detail = ""
-
                 if new_late == "기타":
-                    old_late = str(
-                        selected_row.get("지각사유", "")
-                    )
-
-                    old_late_detail = (
-                        old_late.split(":", 1)[1].strip()
-                        if old_late.startswith("기타:")
-                        else ""
-                    )
-
+                    old_late = str(selected_row.get("지각사유", ""))
+                    old_late_detail = old_late.split(":", 1)[1].strip() if old_late.startswith("기타:") else ""
                     new_late_detail = st.text_input(
                         "지각 사유 상세 입력",
                         value=old_late_detail,
                         key=f"admin_edit_late_detail_{selected_date}_{selected_name}"
                     )
 
-                save_edit = st.button(
-                    "수정 저장",
-                    key="admin_save_edit"
-                )
+                save_edit = st.button("수정 저장", key="admin_save_edit")
 
                 if save_edit:
-                    df = load_data()
-
                     mask = (
-                        (
-                            df["날짜"].astype(str)
-                            == selected_date.isoformat()
-                        )
-                        & (
-                            df["이름"].astype(str)
-                            == selected_name
-                        )
+                        (df["날짜"].astype(str) == selected_date.isoformat())
+                        & (df["이름"].astype(str) == selected_name)
                     )
 
                     indexes = df.index[mask].tolist()
@@ -1340,51 +1094,26 @@ elif page == "관리자 페이지":
                         idx = indexes[-1]
 
                         df.at[idx, "출결상태"] = new_status
-
                         df.at[idx, "결석사유"] = (
                             f"기타: {new_absence_detail.strip()}"
-                            if (
-                                new_status == "결석"
-                                and new_absence == "기타"
-                                and new_absence_detail.strip()
-                            )
-                            else (
-                                new_absence
-                                if new_status == "결석"
-                                else ""
-                            )
+                            if new_status == "결석" and new_absence == "기타" and new_absence_detail.strip()
+                            else new_absence if new_status == "결석" else ""
                         )
-
                         df.at[idx, "지각사유"] = (
                             f"기타: {new_late_detail.strip()}"
-                            if (
-                                new_status == "지각"
-                                and new_late == "기타"
-                                and new_late_detail.strip()
-                            )
-                            else (
-                                new_late
-                                if new_status == "지각"
-                                else ""
-                            )
+                            if new_status == "지각" and new_late == "기타" and new_late_detail.strip()
+                            else new_late if new_status == "지각" else ""
                         )
 
                         save_data(df)
                         st.success("출결 기록을 수정했습니다.")
                         st.rerun()
 
-                    else:
-                        st.error("수정할 출결 기록을 찾을 수 없습니다.")
-
-        # -------------------------
         # CSV 다운로드
-        # -------------------------
         st.divider()
         st.subheader("출결 데이터 다운로드")
 
-        all_df = load_data()
-
-        all_csv = all_df.to_csv(
+        all_csv = df.to_csv(
             index=False,
             encoding="utf-8-sig"
         ).encode("utf-8-sig")
@@ -1403,9 +1132,8 @@ elif page == "관리자 페이지":
         )
 
         month_key = month_value.strftime("%Y-%m")
-
-        month_df = all_df[
-            all_df["날짜"].astype(str).str.startswith(month_key)
+        month_df = df[
+            df["날짜"].astype(str).str.startswith(month_key)
         ].copy()
 
         st.download_button(
@@ -1417,7 +1145,6 @@ elif page == "관리자 페이지":
             file_name=f"{month_key}_출결기록.csv",
             mime="text/csv"
         )
-
 
     # -------------------------
     # 출석 기간 설정
@@ -1445,7 +1172,7 @@ elif page == "관리자 페이지":
             new_start = st.date_input(
                 "출석 시작일",
                 value=old_start
-    )
+            )
 
             new_end = st.date_input(
                 "출석 종료일",
@@ -1471,16 +1198,12 @@ elif page == "관리자 페이지":
                 )
                 st.rerun()
 
-
     # -------------------------
     # 관리자 관리
     # -------------------------
     with tab3:
         st.subheader("관리자 임명")
         current_admins = load_json(ADMINS_FILE, [])
-
-        if not isinstance(current_admins, list):
-            current_admins = []
 
         with st.form("add_admin_form"):
             new_admin = st.text_input("관리자로 지정할 이름")
@@ -1491,16 +1214,12 @@ elif page == "관리자 페이지":
 
             if not new_admin:
                 st.error("이름을 입력해 주세요.")
-
             elif new_admin in current_admins:
                 st.warning("이미 관리자입니다.")
-
             else:
                 current_admins.append(new_admin)
                 save_json(ADMINS_FILE, current_admins)
-                st.success(
-                    f"{new_admin} 님을 관리자로 임명했습니다."
-                )
+                st.success(f"{new_admin} 님을 관리자로 임명했습니다.")
                 st.rerun()
 
         st.divider()
@@ -1523,21 +1242,20 @@ elif page == "관리자 페이지":
             )
 
             if st.button("선택한 관리자 해제"):
-                updated_admins = [
+                current_admins = [
                     name for name in current_admins
                     if name != remove_name
                 ]
 
-                save_json(ADMINS_FILE, updated_admins)
+                save_json(ADMINS_FILE, current_admins)
                 st.success(
                     f"{remove_name} 님의 관리자 권한을 해제했습니다."
                 )
                 st.rerun()
-
         else:
             st.caption("해제할 다른 관리자가 없습니다.")
 
-  
+
 # -----------------------------
 # 안내
 # -----------------------------
@@ -1548,78 +1266,3 @@ st.caption(
     "건물 이름은 OpenStreetMap 데이터에 등록된 정보에 따라 달라질 수 있습니다. "
     "GPS 위치는 실제 출석을 완벽하게 증명하지 않습니다."
 )
-
-
-# -----------------------------
-# 추가 화면 디자인 개선
-# -----------------------------
-st.markdown("""
-<style>
-/* 화면 전체의 읽기 편한 간격 */
-.block-container {
-    max-width: 1220px;
-    padding-top: 2rem;
-    padding-bottom: 3rem;
-}
-
-/* 입력 항목 사이의 간격 */
-[data-testid="stVerticalBlock"] > div {
-    scroll-margin-top: 16px;
-}
-
-/* 입력 상자 */
-.stTextInput input,
-.stTextArea textarea,
-.stDateInput input {
-    border-radius: 12px !important;
-    min-height: 44px;
-}
-
-/* 선택 상자 */
-.stSelectbox [data-baseweb="select"] > div {
-    border-radius: 12px !important;
-    min-height: 44px;
-}
-
-/* 버튼 */
-.stButton > button,
-.stFormSubmitButton > button,
-.stDownloadButton > button,
-.stLinkButton > a {
-    border-radius: 12px !important;
-    min-height: 44px;
-    font-weight: 650;
-    transition: all 0.15s ease;
-}
-
-/* 입력 폼 */
-[data-testid="stForm"] {
-    padding: 1.2rem;
-    border-radius: 16px;
-    margin-bottom: 1rem;
-}
-
-/* 안내 메시지 */
-[data-testid="stAlert"] {
-    border-radius: 12px;
-    padding: 0.9rem 1rem;
-}
-
-/* 출결 통계 카드 */
-[data-testid="stMetric"] {
-    padding: 1rem;
-    border-radius: 14px;
-}
-
-/* 모바일 화면 */
-@media (max-width: 768px) {
-    .block-container {
-        padding: 1rem 0.8rem 2rem;
-    }
-
-    [data-testid="stForm"] {
-        padding: 0.9rem;
-    }
-}
-</style>
-""", unsafe_allow_html=True)
