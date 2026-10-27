@@ -375,44 +375,12 @@ def load_settings():
 # -----------------------------
 # 지도 및 GPS
 # -----------------------------
-def make_map_link(lat, lon):
-    query = urlencode({
-        "api": "1",
-        "query": f"{lat},{lon}"
-    })
-    return f"https://www.google.com/maps/search/?{query}"
-
-
-def haversine_m(lat1, lon1, lat2, lon2):
-    """GPS 두 좌표 사이의 직선거리를 미터 단위로 계산합니다."""
-    radius = 6371000
-
-    p1 = math.radians(lat1)
-    p2 = math.radians(lat2)
-    dp = math.radians(lat2 - lat1)
-    dl = math.radians(lon2 - lon1)
-
-    a = (
-        math.sin(dp / 2) ** 2
-        + math.cos(p1)
-        * math.cos(p2)
-        * math.sin(dl / 2) ** 2
-    )
-
-    a = max(0, min(1, a))
-
-    return radius * 2 * math.atan2(
-        math.sqrt(a),
-        math.sqrt(1 - a)
-    )
-
-
 def find_nearest_building(lat, lon):
     """
-    OpenStreetMap에서 GPS 위치 기준 300m 이내 건물을 찾고
+    OpenStreetMap에서 GPS 위치 기준 검색 반경 이내 건물을 찾고
     가장 가까운 건물 정보를 반환합니다.
 
-API 키는 필요하지 않지만 인터넷과 검색 서버가 필요합니다.
+    API 키는 필요하지 않지만 인터넷과 검색 서버가 필요합니다.
     """
     query = f"""
     [out:json][timeout:20];
@@ -441,7 +409,8 @@ API 키는 필요하지 않지만 인터넷과 검색 서버가 필요합니다.
             )
             response.raise_for_status()
             elements = response.json().get("elements", [])
-   break
+            break
+
         except Exception:
             continue
 
@@ -472,9 +441,9 @@ API 키는 필요하지 않지만 인터넷과 검색 서버가 필요합니다.
             lat, lon, building_lat, building_lon
         )
 
-        # 검색 결과도 다시 거리 검사
+        # 검색 반경을 초과한 건물은 제외
         if distance > BUILDING_SEARCH_RADIUS:
-continue
+            continue
 
         name = str(tags.get("name", "")).strip()
 
@@ -486,7 +455,9 @@ continue
             if address:
                 name = address
             else:
-                building_type = str(tags.get("building", "")).strip()
+                building_type = str(
+                    tags.get("building", "")
+                ).strip()
 
                 if building_type and building_type != "yes":
                     name = f"이름 미등록 건물 ({building_type})"
