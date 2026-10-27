@@ -18,8 +18,8 @@ st.set_page_config(
 )
 
 BASE_DIR = Path(__file__).resolve().parent
-DATA_DIR = BASE_DIR / "attendance_data"
-DATA_DIR.mkdir(exist_ok=True)
+PHOTO_DIR = DATA_DIR / "photos"
+PHOTO_DIR.mkdir(parents=True, exist_ok=True)
 
 CSV_FILE = DATA_DIR / "attendance.csv"
 ADMINS_FILE = DATA_DIR / "admins.json"
@@ -28,7 +28,7 @@ SETTINGS_FILE = DATA_DIR / "settings.json"
 COLUMNS = [
     "날짜", "이름", "출결상태", "결석사유", "지각사유",
     "등록시간", "건물 이름", "GPS정확도(m)", "지도링크",
-    "위도", "경도"
+    "위도", "경도", "현장 사진 파일"
 ]
 
 ABSENCE_REASONS = [
@@ -416,6 +416,9 @@ if "user_name" not in st.session_state:
 if "location_result" not in st.session_state:
     st.session_state.location_result = None
 
+if "camera_auth_pending" not in st.session_state:
+    st.session_state.camera_auth_pending = None
+
 # -----------------------------
 # 같은 브라우저에서 다른 이름 로그인 제한
 # -----------------------------
@@ -607,6 +610,126 @@ elif page == "출석관리":
 
             loc = st.session_state.location_result
 
+
+# -----------------------------
+# 주변 건물 검색 실패 시 카메라 대체 인증
+# -----------------------------
+pending = st.session_state.camera_auth_pending
+
+if pending:
+    st.subheader("📷 현장 사진 인증")
+    st.info(
+        "주변 건물을 찾지 못했습니다. "
+        "현재 있는 장소의 건물 외관이나 주변 환경을 촬영해 주세요. "
+        "사진은 관리자 확인용으로 저장됩니다."
+    )
+
+    st.write(f"이름: **{pending['이름']}**")
+    st.write(f"출결 상태: **{pending['출결상태']}**")
+    st.write(
+        f"GPS 정확도: 약 **{pending['GPS정확도(m)']}m**"
+    )
+
+    st.link_button(
+        "현재 GPS 위치 지도 확인",
+        pending["지도링크"]
+    )
+
+    photo = st.camera_input(
+        "주변 건물 또는 현장 사진 촬영",
+        key="fallback_camera"
+    )
+
+    if photo is not None:
+        st.image(
+            photo,
+            caption="촬영한 현장 사진",
+            use_container_width=True
+        )
+
+        if st.button(
+            "현장 사진으로 출석 등록",
+            type="primary",
+            key="save_camera_attendance"
+        ):
+            df_check = load_data()
+
+            duplicate = (
+                (df_check["날짜"].astype(str) == pending["날짜"])
+                & (df_check["이름"].astype(str) == pending["이름"])
+            ).any()
+
+            if duplicate:
+                st.error("오늘 출석 기록이 이미 등록되어 있습니다.")
+            else:
+                try:
+                    # 사진 파일명은 서버에서 생성
+                    extension = (
+                        ".png"
+                        if photo.type == "image/png"
+                        else ".jpg"
+                    )
+
+                    filename = (
+                        f"{pending['날짜']}_"
+                        f"{datetime.now().strftime('%H%M%S%f')}"
+                        f"{extension}"
+                    )
+
+                    photo_path = PHOTO_DIR / filename
+
+                    with open(photo_path, "wb") as photo_file:
+                        photo_file.write(photo.getvalue())
+
+                    record = {
+                        "날짜": pending["날짜"],
+                        "이름": pending["이름"],
+                        "출결상태": pending["출결상태"],
+                        "결석사유": pending["결석사유"],
+                        "지각사유": pending["지각사유"],
+                        "등록시간": datetime.now().strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        ),
+                        "건물 이름": "건물 검색 실패 - 사진 인증",
+                        "GPS정확도(m)": pending["GPS정확도(m)"],
+                        "지도링크": pending["지도링크"],
+                        "위도": pending["위도"],
+                        "경도": pending["경도"],
+                        "인증 방식": "현장 사진 인증 - 관리자 확인 필요",
+                        "현장 사진 파일": filename
+                    }
+
+                    df_check = pd.concat(
+                        [df_check, pd.DataFrame([record])],
+                        ignore_index=True
+                    )
+
+                    save_data(df_check)
+
+                    st.session_state.camera_auth_pending = None
+                    st.session_state.location_result = None
+
+                    st.success(
+                        "사진 인증 출석 기록을 저장했습니다. "
+                        "관리자 확인이 필요합니다."
+                    )
+                    st.rerun()
+
+                except Exception as exc:
+                    st.error(
+                        f"사진 또는 출석 기록을 저장하지 못했습니다: {exc}"
+                    )
+
+    if st.button(
+        "사진 인증 취소",
+        key="cancel_camera_auth"
+    ):
+        st.session_state.camera_auth_pending = None
+        st.rerun()
+
+    # 대체 인증 화면이 표시되는 동안 일반 출석 양식은 실행하지 않음
+    st.stop()
+
             if loc:
                 lat = loc["lat"]
                 lon = loc["lon"]
@@ -686,14 +809,38 @@ elif page == "출석관리":
                                 nearby_building = find_nearest_building(
                                     lat, lon
                                 )
+if nearby_building is None:
+    st.warning(
+        "주변 건물을 찾지 못했습니다. "
+        "현장 사진으로 대체 인증을 진행할 수 있습니다."
+    )
 
-                            if nearby_building is None:
-                                st.error(
-                                    "300m 이내의 건물 정보를 찾지 못했습니다. "
-                                    "인터넷 연결을 확인하고 다시 시도해 주세요. "
-                                    "지도 데이터에 건물이 등록되어 있지 않을 수도 있습니다."
-                                )
-                            else:
+    st.session_state.camera_auth_pending = {
+        "날짜": today.isoformat(),
+        "이름": user_name,
+        "출결상태": status,
+        "결석사유": (
+            f"기타: {detail.strip()}"
+            if status == "결석"
+            and absence_reason == "기타"
+            and detail.strip()
+            else absence_reason
+        ),
+        "지각사유": (
+            f"기타: {detail.strip()}"
+            if status == "지각"
+            and late_reason == "기타"
+            and detail.strip()
+            else late_reason
+        ),
+        "위도": lat,
+        "경도": lon,
+        "GPS정확도(m)": round(accuracy, 1),
+        "지도링크": make_map_link(lat, lon)
+    }
+
+    st.rerun()
+                                                      else:
                                 if (
                                     status == "결석"
                                     and absence_reason == "기타"
@@ -910,6 +1057,48 @@ elif page == "관리자 페이지":
         "출석 기간 설정",
         "관리자 관리"
     ])
+
+st.subheader("📷 현장 사진 인증 확인")
+
+photo_records = day_df[
+    day_df["현장 사진 파일"].astype(str).str.strip() != ""
+]
+
+if photo_records.empty:
+    st.info("선택한 날짜에 확인할 현장 사진이 없습니다.")
+else:
+    for _, photo_record in photo_records.iterrows():
+        st.markdown(
+            f"**{photo_record['이름']}** · "
+            f"{photo_record['등록시간']}"
+        )
+
+        filename = Path(
+            str(photo_record["현장 사진 파일"])
+        ).name
+
+        photo_path = PHOTO_DIR / filename
+
+        if photo_path.is_file():
+            st.image(
+                str(photo_path),
+                caption=(
+                    f"인증 방식: {photo_record['인증 방식']} · "
+                    f"GPS 정확도: {photo_record['GPS정확도(m)']}m"
+                ),
+                use_container_width=True
+            )
+
+            st.link_button(
+                f"{photo_record['이름']}의 등록 위치 지도",
+                str(photo_record["지도링크"]),
+                key=f"photo_map_{photo_record['날짜']}_{filename}"
+            )
+        else:
+            st.warning(
+                f"{photo_record['이름']}의 사진 파일을 찾을 수 없습니다. "
+                "서버 재시작 또는 배포 환경의 파일 저장 정책을 확인해 주세요."
+            )
 
     # -------------------------
     # 출결 조회 및 수정
