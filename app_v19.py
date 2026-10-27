@@ -348,7 +348,7 @@ def load_json(path, default):
    try:
     with open(path, "r", encoding="utf-8") as file:
         content = file.read()
-except Exception as e:
+   except Exception as e:
     st.error(f"파일 읽기 오류: {e}")
 
 def save_json(path, data):
