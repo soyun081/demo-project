@@ -41,8 +41,8 @@ LATE_REASONS = [
     "학교 승인 활동", "기타"
 ]
 
-MAX_GPS_ACCURACY = 100
-BUILDING_SEARCH_RADIUS = 100
+MAX_GPS_ACCURACY = 300
+BUILDING_SEARCH_RADIUS = 300
 
 # -----------------------------
 # 화면 디자인
@@ -308,7 +308,7 @@ def haversine_m(lat1, lon1, lat2, lon2):
 
 def find_nearest_building(lat, lon):
     """
-    OpenStreetMap에서 GPS 위치 기준 100m 이내 건물을 찾고
+    OpenStreetMap에서 GPS 위치 기준 300m 이내 건물을 찾고
     가장 가까운 건물 정보를 반환합니다.
 
     API 키는 필요하지 않지만 인터넷과 검색 서버가 필요합니다.
@@ -403,6 +403,7 @@ def find_nearest_building(lat, lon):
         return None
 
     return min(candidates, key=lambda item: item["distance"])
+
 
 # -----------------------------
 # 세션 및 로그인
@@ -557,7 +558,7 @@ elif page == "출석관리":
         else:
             st.info(
                 "브라우저의 위치 권한을 허용해 주세요. "
-                "GPS 정확도가 100m보다 나쁘면 등록할 수 없습니다."
+                "GPS 정확도가 300m보다 나쁘면 등록할 수 없습니다."
             )
 
             try:
@@ -621,7 +622,7 @@ elif page == "출석관리":
 
                 if accuracy > MAX_GPS_ACCURACY:
                     st.error(
-                        "GPS 정확도가 100m를 초과합니다. "
+                        "GPS 정확도가 300m를 초과합니다. "
                         "창가나 실외에서 위치를 다시 확인해 주세요."
                     )
 
@@ -678,7 +679,7 @@ elif page == "출석관리":
                             st.error("GPS 정확도가 기준을 초과했습니다.")
                         else:
                             with st.spinner(
-                                "100m 이내의 가장 가까운 건물을 검색하고 있습니다..."
+                                "300m 이내의 가장 가까운 건물을 검색하고 있습니다..."
                             ):
                                 nearby_building = find_nearest_building(
                                     lat, lon
@@ -686,7 +687,7 @@ elif page == "출석관리":
 
                             if nearby_building is None:
                                 st.error(
-                                    "100m 이내의 건물 정보를 찾지 못했습니다. "
+                                    "300m 이내의 건물 정보를 찾지 못했습니다. "
                                     "인터넷 연결을 확인하고 다시 시도해 주세요. "
                                     "지도 데이터에 건물이 등록되어 있지 않을 수도 있습니다."
                                 )
@@ -782,6 +783,99 @@ elif page == "내 출결 기록":
             mime="text/csv"
         )
 
+        st.divider()
+        st.subheader("내 출결 기록 수정")
+
+        def student_reason_index(value, options):
+            value = str(value)
+            if value in options:
+                return options.index(value)
+            if value.startswith("기타"):
+                return options.index("기타")
+            return 0
+
+        student_record_labels = {}
+        for record_index, record in mine.iterrows():
+            label = (
+                f"{record.get('날짜', '')} · {record.get('출결상태', '')} · "
+                f"{record.get('건물 이름', '')} · 기록 #{record_index}"
+            )
+            student_record_labels[label] = record_index
+
+        selected_student_label = st.selectbox(
+            "수정할 기록 선택",
+            list(student_record_labels.keys()),
+            key="student_edit_record"
+        )
+        student_idx = student_record_labels[selected_student_label]
+        student_row = df.loc[student_idx]
+        student_status_options = ["출석", "결석", "지각"]
+        student_current_status = str(student_row.get("출결상태", "출석"))
+        student_status_index = (
+            student_status_options.index(student_current_status)
+            if student_current_status in student_status_options else 0
+        )
+
+        student_new_status = st.selectbox(
+            "출결 상태",
+            student_status_options,
+            index=student_status_index,
+            key=f"student_edit_status_{student_idx}"
+        )
+        student_new_absence = st.selectbox(
+            "결석 사유",
+            ABSENCE_REASONS,
+            index=student_reason_index(student_row.get("결석사유", ""), ABSENCE_REASONS),
+            key=f"student_edit_absence_{student_idx}"
+        )
+        student_absence_detail = ""
+        if student_new_absence == "기타":
+            old_absence = str(student_row.get("결석사유", ""))
+            old_absence_detail = old_absence.split(":", 1)[1].strip() if old_absence.startswith("기타:") else ""
+            student_absence_detail = st.text_input(
+                "결석 사유 상세 입력",
+                value=old_absence_detail,
+                key=f"student_edit_absence_detail_{student_idx}"
+            )
+
+        student_new_late = st.selectbox(
+            "지각 사유",
+            LATE_REASONS,
+            index=student_reason_index(student_row.get("지각사유", ""), LATE_REASONS),
+            key=f"student_edit_late_{student_idx}"
+        )
+        student_late_detail = ""
+        if student_new_late == "기타":
+            old_late = str(student_row.get("지각사유", ""))
+            old_late_detail = old_late.split(":", 1)[1].strip() if old_late.startswith("기타:") else ""
+            student_late_detail = st.text_input(
+                "지각 사유 상세 입력",
+                value=old_late_detail,
+                key=f"student_edit_late_detail_{student_idx}"
+            )
+
+        if st.button("내 출결 수정 저장", key="student_save_edit"):
+            df = load_data()
+            if student_idx not in df.index or str(df.at[student_idx, "이름"]) != user_name:
+                st.error("수정할 기록을 찾을 수 없습니다. 화면을 새로고침해 주세요.")
+            else:
+                saved_absence = (
+                    f"기타: {student_absence_detail.strip()}"
+                    if student_new_absence == "기타" and student_absence_detail.strip()
+                    else student_new_absence if student_new_status == "결석" else ""
+                )
+                saved_late = (
+                    f"기타: {student_late_detail.strip()}"
+                    if student_new_late == "기타" and student_late_detail.strip()
+                    else student_new_late if student_new_status == "지각" else ""
+                )
+                df.at[student_idx, "출결상태"] = student_new_status
+                df.at[student_idx, "결석사유"] = saved_absence if student_new_status == "결석" else ""
+                df.at[student_idx, "지각사유"] = saved_late if student_new_status == "지각" else ""
+                save_data(df)
+                st.success("내 출결 기록을 수정했습니다.")
+                st.rerun()
+
         st.subheader("등록 위치 지도")
 
         for index, record in mine.iterrows():
@@ -797,6 +891,7 @@ elif page == "내 출결 기록":
                     map_url,
                     key=f"student_map_{index}"
                 )
+
 
 # -----------------------------
 # 관리자 페이지
@@ -938,32 +1033,52 @@ elif page == "관리자 페이지":
 
                     return 0
 
-                with st.form("admin_edit_form"):
-                    new_status = st.selectbox(
-                        "출결 상태 수정",
-                        status_options,
-                        index=status_index
+                new_status = st.selectbox(
+                    "출결 상태 수정",
+                    status_options,
+                    index=status_index,
+                    key=f"admin_edit_status_{selected_date}_{selected_name}"
+                )
+
+                new_absence = st.selectbox(
+                    "결석 사유",
+                    ABSENCE_REASONS,
+                    index=reason_index(
+                        selected_row["결석사유"],
+                        ABSENCE_REASONS
+                    ),
+                    key=f"admin_edit_absence_{selected_date}_{selected_name}"
+                )
+                new_absence_detail = ""
+                if new_absence == "기타":
+                    old_absence = str(selected_row.get("결석사유", ""))
+                    old_absence_detail = old_absence.split(":", 1)[1].strip() if old_absence.startswith("기타:") else ""
+                    new_absence_detail = st.text_input(
+                        "결석 사유 상세 입력",
+                        value=old_absence_detail,
+                        key=f"admin_edit_absence_detail_{selected_date}_{selected_name}"
                     )
 
-                    new_absence = st.selectbox(
-                        "결석 사유",
-                        ABSENCE_REASONS,
-                        index=reason_index(
-                            selected_row["결석사유"],
-                            ABSENCE_REASONS
-                        )
+                new_late = st.selectbox(
+                    "지각 사유",
+                    LATE_REASONS,
+                    index=reason_index(
+                        selected_row["지각사유"],
+                        LATE_REASONS
+                    ),
+                    key=f"admin_edit_late_{selected_date}_{selected_name}"
+                )
+                new_late_detail = ""
+                if new_late == "기타":
+                    old_late = str(selected_row.get("지각사유", ""))
+                    old_late_detail = old_late.split(":", 1)[1].strip() if old_late.startswith("기타:") else ""
+                    new_late_detail = st.text_input(
+                        "지각 사유 상세 입력",
+                        value=old_late_detail,
+                        key=f"admin_edit_late_detail_{selected_date}_{selected_name}"
                     )
 
-                    new_late = st.selectbox(
-                        "지각 사유",
-                        LATE_REASONS,
-                        index=reason_index(
-                            selected_row["지각사유"],
-                            LATE_REASONS
-                        )
-                    )
-
-                    save_edit = st.form_submit_button("수정 저장")
+                save_edit = st.button("수정 저장", key="admin_save_edit")
 
                 if save_edit:
                     mask = (
@@ -978,10 +1093,14 @@ elif page == "관리자 페이지":
 
                         df.at[idx, "출결상태"] = new_status
                         df.at[idx, "결석사유"] = (
-                            new_absence if new_status == "결석" else ""
+                            f"기타: {new_absence_detail.strip()}"
+                            if new_status == "결석" and new_absence == "기타" and new_absence_detail.strip()
+                            else new_absence if new_status == "결석" else ""
                         )
                         df.at[idx, "지각사유"] = (
-                            new_late if new_status == "지각" else ""
+                            f"기타: {new_late_detail.strip()}"
+                            if new_status == "지각" and new_late == "기타" and new_late_detail.strip()
+                            else new_late if new_status == "지각" else ""
                         )
 
                         save_data(df)
