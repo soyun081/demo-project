@@ -317,15 +317,18 @@ def load_data():
     if not CSV_FILE.exists():
         return pd.DataFrame(columns=COLUMNS)
 
-try:
-    # 실행할 코드
-    result = do_something()
+    try:
+        data = pd.read_csv(CSV_FILE, encoding="utf-8-sig")
+    except Exception as e:
+        st.error(f"데이터 파일 읽기 오류: {e}")
+        return pd.DataFrame(columns=COLUMNS)
 
-except Exception as e:
-    # 오류 처리 코드
-    st.error(f"오류가 발생했습니다: {e}")
+    for col in COLUMNS:
+        if col not in data.columns:
+            data[col] = ""
 
     return data[COLUMNS].fillna("")
+
 
 def save_data(data):
     data = data.copy()
@@ -345,11 +348,14 @@ def load_json(path, default):
     if not path.exists():
         return default
 
-   try:
-    with open(path, "r", encoding="utf-8") as file:
-        content = file.read()
-   except Exception as e:
-    st.error(f"파일 읽기 오류: {e}")
+    try:
+        with open(path, "r", encoding="utf-8") as file:
+            content = json.load(file)
+        return content
+    except Exception as e:
+        st.error(f"JSON 파일 읽기 오류: {e}")
+        return default
+
 
 def save_json(path, data):
     with open(path, "w", encoding="utf-8") as file:
