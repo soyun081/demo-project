@@ -625,6 +625,7 @@ elif page == "출석관리":
 
     if today < start_date or today > registration_end:
         st.error("현재는 출석 등록 기간이 아닙니다.")
+
     else:
         df = load_data()
 
@@ -635,8 +636,9 @@ elif page == "출석관리":
 
         if already_registered:
             st.warning("오늘은 이미 출석 기록이 등록되어 있습니다.")
+
         else:
-  st.info(
+            st.info(
                 "브라우저의 위치 권한을 허용해 주세요. "
                 "GPS 정확도가 300m보다 나쁘면 등록할 수 없습니다."
             )
@@ -644,6 +646,7 @@ elif page == "출석관리":
             try:
                 from streamlit_geolocation import streamlit_geolocation
                 location = streamlit_geolocation()
+
             except ImportError:
                 location = None
                 st.error(
@@ -667,7 +670,7 @@ elif page == "출석관리":
                         lon_value = float(lon_value)
                         accuracy_value = float(accuracy_value)
 
-  if (
+                        if (
                             math.isfinite(lat_value)
                             and math.isfinite(lon_value)
                             and math.isfinite(accuracy_value)
@@ -680,6 +683,7 @@ elif page == "출석관리":
                                 "lon": lon_value,
                                 "accuracy": accuracy_value
                             }
+
                     except (TypeError, ValueError):
                         pass
 
@@ -695,7 +699,7 @@ elif page == "출석관리":
                 st.write(f"경도: `{lon:.6f}`")
                 st.write(f"GPS 정확도: 약 **{accuracy:.0f}m**")
 
- st.link_button(
+                st.link_button(
                     "Google 지도에서 현재 위치 확인",
                     make_map_link(lat, lon)
                 )
@@ -726,7 +730,7 @@ elif page == "출석관리":
 
                         if status == "결석":
                             absence_reason = st.selectbox(
-  "결석 사유",
+                                "결석 사유",
                                 ABSENCE_REASONS
                             )
 
@@ -755,9 +759,11 @@ elif page == "출석관리":
 
                         if duplicate:
                             st.error("오늘 기록이 이미 존재합니다.")
+
                         elif accuracy > MAX_GPS_ACCURACY:
                             st.error("GPS 정확도가 기준을 초과했습니다.")
- else:
+
+                        else:
                             with st.spinner(
                                 "300m 이내의 가장 가까운 건물을 검색하고 있습니다..."
                             ):
@@ -771,6 +777,7 @@ elif page == "출석관리":
                                     "인터넷 연결을 확인하고 다시 시도해 주세요. "
                                     "지도 데이터에 건물이 등록되어 있지 않을 수도 있습니다."
                                 )
+
                             else:
                                 if (
                                     status == "결석"
@@ -790,7 +797,7 @@ elif page == "출석관리":
                                         if detail.strip() else "기타"
                                     )
 
- record = {
+                                record = {
                                     "날짜": today.isoformat(),
                                     "이름": user_name,
                                     "출결상태": status,
@@ -820,7 +827,8 @@ elif page == "출석관리":
                                     f"(건물 중심까지 약 "
                                     f"{nearby_building['distance']:.0f}m)"
                                 )
-                         st.rerun()
+                                st.rerun()
+
             else:
                 st.warning(
                     "GPS 정보를 아직 받지 못했습니다. "
